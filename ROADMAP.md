@@ -8,10 +8,13 @@
 
 ## Next
 
-- [ ] Add persistent index with incremental file updates
+- [x] Add persistent index with incremental file updates
 - [ ] Build local results UI with clickable source citations
 - [ ] Add optional embeddings and local model adapters
 
 ## Continuity
 
 Initial foundation implemented and checked on 2026-10-17. Inspect current code and commits before continuing. Prioritize the first unchecked item and keep improvements small enough to verify. No visual dashboard has been implemented.
+
+
+2026-10-18: Added optional root-bound SQLite index, content-hash reuse and stale-document cleanup. Nine tests pass. Next: local results UI with source citations; browser review will be required before claiming visual completion.

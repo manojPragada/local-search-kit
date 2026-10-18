@@ -22,6 +22,16 @@ Results rank by the fraction of distinct query words matched on a single line, t
 
 Run `python app.py --help` for available options.
 
+## Persistent incremental index
+
+```bash
+python app.py examples "keyword source" --index /tmp/local-search-demo.sqlite3
+```
+
+Use a writable database path with an existing parent folder. Each indexed search scans eligible files and computes content hashes, then retokenizes only added or changed files. Deleted or newly excluded/unreadable documents are removed. This avoids repeating tokenization, but still reads and hashes source files; it is not a filesystem watcher or a full-text SQL index. Query matching scans stored tokenized lines with the same ranking and citations as ordinary search.
+
+Each database is bound to one resolved root folder. Choose a new database when searching another folder. The index contains document excerpts and tokens: keep it private, and delete it when no longer needed. Database files are ignored by git. Only use index files you trust.
+
 ## Development and verification
 
 ```bash
@@ -29,7 +39,7 @@ python -m unittest discover -s tests -v
 python -m compileall -q app.py tests
 ```
 
-Tests exercise behavior with temporary/local data. PufferFish's recording test uses only a loopback HTTP server. There is no build step or configured linter; compilation is a syntax check, not linting.
+Tests exercise temporary documents and SQLite indexes, including updates, deletions, root binding and unchanged-file reuse. There is no build step or configured linter; compilation is a syntax check, not linting.
 
 ## Configuration
 
@@ -39,7 +49,7 @@ Configuration is provided through CLI arguments. No environment variables, `.env
 
 ```text
 app.py          CLI and core domain functions
-examples/       synthetic example inputs (queue-lab uses commands above)
+examples/       synthetic example inputs
 tests/          behavioral unit tests
 ROADMAP.md      completed work and prioritized next steps
 .env.example    configuration notes
@@ -53,7 +63,7 @@ A single dependency-free module exposes importable core functions and a CLI entr
 
 ## Limitations
 
-Only UTF-8 `.txt` and `.md` files up to 1 MiB are considered. Hidden paths, symlinks and unreadable files are skipped. Queries scan files afresh; there is no index, semantic search, PDF extraction or UI yet. Use a trusted folder; this is not a sandbox against concurrent malicious filesystem changes.
+Only UTF-8 `.txt` and `.md` files up to 1 MiB are considered. Hidden paths, symlinks and unreadable files are skipped. The default mode scans files afresh; optional indexed mode persists tokenized lines. There is no semantic search, PDF extraction or UI yet. Use a trusted folder; this is not a sandbox against concurrent malicious filesystem changes.
 
 ## Running and deployment
 
@@ -71,3 +81,4 @@ Run locally from the repository using the commands above. No hosted deployment h
 Open an issue describing the observed behavior, expected result and a minimal synthetic example. Keep changes focused, include behavioral tests, run the checks above, and update this README when commands or capabilities change. Do not submit credentials or private input files.
 
 Implementation and synthetic examples are original to this repository. There are no third-party runtime dependencies or media assets. A redistribution license has not yet been selected; public visibility alone does not grant an open-source license.
+
