@@ -9,6 +9,7 @@
 ## Next
 
 - [x] Add persistent index with incremental file updates
+- [x] Add readable Markdown result reports with line citations
 - [ ] Build local results UI with clickable source citations
 - [ ] Add optional embeddings and local model adapters
 
@@ -18,3 +19,6 @@ Initial foundation implemented and checked on 2026-10-17. Inspect current code a
 
 
 2026-10-18: Added optional root-bound SQLite index, content-hash reuse and stale-document cleanup. Nine tests pass. Next: local results UI with source citations; browser review will be required before claiming visual completion.
+
+
+2026-10-19: Added --format markdown for direct and indexed search, with literal excerpts and explicit lexical coverage labels. JSON remains the default. Web UI and clickable local citations remain pending.

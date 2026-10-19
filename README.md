@@ -32,6 +32,15 @@ Use a writable database path with an existing parent folder. Each indexed search
 
 Each database is bound to one resolved root folder. Choose a new database when searching another folder. The index contains document excerpts and tokens: keep it private, and delete it when no longer needed. Database files are ignored by git. Only use index files you trust.
 
+## Readable search reports
+
+```bash
+python app.py examples "keyword source" --format markdown
+python app.py examples "keyword source" --index /tmp/local-search-demo.sqlite3 --format markdown
+```
+
+JSON remains the default. Markdown output includes the query, ranked matches, relative file/line citations, excerpts and query-word coverage percentages. Percentages are lexical match coverage, not semantic confidence. Source paths and document text are formatted as literal code; citations are plain references rather than links that pretend to jump to local line numbers. Reports may contain private document excerpts: review before sharing. If redirecting output to a file, put it outside the search folder to avoid indexing your previous reports. No web UI is implemented yet.
+
 ## Development and verification
 
 ```bash
@@ -48,7 +57,8 @@ Configuration is provided through CLI arguments. No environment variables, `.env
 ## Structure
 
 ```text
-app.py          CLI and core domain functions
+app.py          CLI and search/index logic
+reporting.py    literal-text Markdown result reports
 examples/       synthetic example inputs
 tests/          behavioral unit tests
 ROADMAP.md      completed work and prioritized next steps
@@ -81,4 +91,5 @@ Run locally from the repository using the commands above. No hosted deployment h
 Open an issue describing the observed behavior, expected result and a minimal synthetic example. Keep changes focused, include behavioral tests, run the checks above, and update this README when commands or capabilities change. Do not submit credentials or private input files.
 
 Implementation and synthetic examples are original to this repository. There are no third-party runtime dependencies or media assets. A redistribution license has not yet been selected; public visibility alone does not grant an open-source license.
+
 

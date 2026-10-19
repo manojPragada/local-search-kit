@@ -50,3 +50,4 @@ class Tests(unittest.TestCase):
             Path(d,'a.md').write_text('hello');db=Path(cache)/'index.sqlite3';sync_index(d,db)
             with patch('app.terms',side_effect=AssertionError('unchanged file retokenized')):
                 self.assertEqual(sync_index(d,db)['unchanged'],1)
+

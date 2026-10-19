@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import sys
+from reporting import markdown_report
 
 def terms(text):return set(re.findall(r'\w+',text.casefold()))
 def documents(root):
@@ -91,10 +92,11 @@ def indexed_search(folder, query, database, limit=10):
         db.close()
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown'],default='json');a=p.parse_args()
     try:
         results = indexed_search(a.folder,a.query,a.index,a.limit) if a.index else search(a.folder,a.query,a.limit)
-        print(json.dumps(results,indent=2));return 0
+        print(markdown_report(a.query,results) if a.format=='markdown' else json.dumps(results,indent=2));return 0
     except (OSError,ValueError,sqlite3.Error) as exc:print(str(exc),file=sys.stderr);return 2
 if __name__=='__main__':sys.exit(main())
+
 
