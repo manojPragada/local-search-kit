@@ -9,6 +9,22 @@ import sys
 from reporting import markdown_report
 
 def terms(text):return set(re.findall(r'\w+',text.casefold()))
+
+def query_terms(query, limit, match):
+    if type(limit) is not int or limit < 1:
+        raise ValueError('Limit must be a positive integer')
+    if match not in ('any', 'all'):
+        raise ValueError('Match mode must be any or all')
+    wanted = terms(query)
+    if not wanted:
+        raise ValueError('Query must contain a word')
+    return wanted
+
+def matching_score(wanted, available, match):
+    hits = wanted & available
+    if not hits or (match == 'all' and hits != wanted):
+        return None
+    return len(hits) / len(wanted)
 def documents(root):
     for path in sorted(root.rglob('*')):
         relative=path.relative_to(root)
@@ -21,18 +37,16 @@ def documents(root):
         except (OSError,UnicodeError):continue
         yield relative.as_posix(), text
 
-def search(folder,query,limit=10):
+def search(folder,query,limit=10,match='any'):
     root=Path(folder).resolve()
     if not root.is_dir():raise ValueError('Search root must be a directory')
-    wanted=terms(query)
-    if not wanted:raise ValueError('Query must contain a word')
-    if limit<1:raise ValueError('Limit must be positive')
+    wanted=query_terms(query, limit, match)
     results=[]
     for relative, text in documents(root):
         for line,content in enumerate(text.splitlines(),1):
-            hits=wanted & terms(content)
-            if hits:
-                results.append({'source':relative,'line':line,'score':len(hits)/len(wanted),'excerpt':content[:300]})
+            score = matching_score(wanted, terms(content), match)
+            if score is not None:
+                results.append({'source':relative,'line':line,'score':score,'excerpt':content[:300]})
     return sorted(results,key=lambda r:(-r['score'],r['source'],r['line']))[:limit]
 
 def sync_index(folder, database):
@@ -73,30 +87,27 @@ def sync_index(folder, database):
     finally:
         db.close()
 
-def indexed_search(folder, query, database, limit=10):
-    wanted = terms(query)
-    if not wanted:
-        raise ValueError('Query must contain a word')
-    if limit < 1:
-        raise ValueError('Limit must be positive')
+def indexed_search(folder, query, database, limit=10, match='any'):
+    wanted = query_terms(query, limit, match)
     sync_index(folder, database)
     db = sqlite3.connect(database)
     try:
         results = []
         for source, line, tokens, excerpt in db.execute('SELECT path,line,tokens,excerpt FROM lsk_lines'):
-            hits = wanted & set(json.loads(tokens))
-            if hits:
-                results.append({'source':source,'line':line,'score':len(hits)/len(wanted),'excerpt':excerpt})
+            score = matching_score(wanted, set(json.loads(tokens)), match)
+            if score is not None:
+                results.append({'source':source,'line':line,'score':score,'excerpt':excerpt})
         return sorted(results, key=lambda result:(-result['score'],result['source'],result['line']))[:limit]
     finally:
         db.close()
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown'],default='json');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown'],default='json');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');a=p.parse_args()
     try:
-        results = indexed_search(a.folder,a.query,a.index,a.limit) if a.index else search(a.folder,a.query,a.limit)
+        results = indexed_search(a.folder,a.query,a.index,a.limit,a.match) if a.index else search(a.folder,a.query,a.limit,a.match)
         print(markdown_report(a.query,results) if a.format=='markdown' else json.dumps(results,indent=2));return 0
     except (OSError,ValueError,sqlite3.Error) as exc:print(str(exc),file=sys.stderr);return 2
 if __name__=='__main__':sys.exit(main())
+
 
 

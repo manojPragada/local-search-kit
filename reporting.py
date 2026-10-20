@@ -23,3 +23,4 @@ def markdown_report(query, results):
         lines += ['    ' + line for line in result['excerpt'].splitlines() or ['']]
         lines += ['']
     return '\n'.join(lines)
+

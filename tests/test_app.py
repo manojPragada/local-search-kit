@@ -51,3 +51,4 @@ class Tests(unittest.TestCase):
             with patch('app.terms',side_effect=AssertionError('unchanged file retokenized')):
                 self.assertEqual(sync_index(d,db)['unchanged'],1)
 
+

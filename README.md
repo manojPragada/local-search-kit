@@ -69,6 +69,15 @@ ROADMAP.md      completed work and prioritized next steps
 
 ## Architecture
 
+### Match every query word
+
+```bash
+python app.py examples 'local search' --match all
+python app.py examples 'local search' --match all --index search.sqlite3 --format markdown
+```
+
+`--match any` preserves the default ranking. `--match all` requires every distinct case-folded query word on the **same line**, not merely somewhere in a document. Word order and duplicates do not matter; this is not exact phrase, fuzzy or semantic search. All-mode results have lexical coverage 1.0, not a confidence probability. Direct and indexed searches share the matching rule and deterministic source/line tie-breaks; switching modes does not require an index rebuild. Imported Python callers can pass `match='all'`; limits must be positive integers. Empty/punctuation-only queries and unknown modes are errors.
+
 A single dependency-free module exposes importable core functions and a CLI entry point. Filesystem and network access occur only when the corresponding commands run. This small foundation will be split into a package, integrations and UI as those features arrive; see the roadmap.
 
 ## Limitations
@@ -91,5 +100,6 @@ Run locally from the repository using the commands above. No hosted deployment h
 Open an issue describing the observed behavior, expected result and a minimal synthetic example. Keep changes focused, include behavioral tests, run the checks above, and update this README when commands or capabilities change. Do not submit credentials or private input files.
 
 Implementation and synthetic examples are original to this repository. There are no third-party runtime dependencies or media assets. A redistribution license has not yet been selected; public visibility alone does not grant an open-source license.
+
 
 

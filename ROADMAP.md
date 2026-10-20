@@ -15,6 +15,8 @@
 
 ## Continuity
 
+2026-10-20: Added --match all for same-line conjunction of distinct query words, preserving default any-word ranking. Shared direct/indexed matching and stricter argument validation; seven tests cover Unicode, duplicates, parity, refresh and CLI JSON/Markdown. Next: local source-citation UI; no semantic search or dashboard claimed.
+
 Initial foundation implemented and checked on 2026-10-17. Inspect current code and commits before continuing. Prioritize the first unchecked item and keep improvements small enough to verify. No visual dashboard has been implemented.
 
 
@@ -22,3 +24,4 @@ Initial foundation implemented and checked on 2026-10-17. Inspect current code a
 
 
 2026-10-19: Added --format markdown for direct and indexed search, with literal excerpts and explicit lexical coverage labels. JSON remains the default. Web UI and clickable local citations remain pending.
+

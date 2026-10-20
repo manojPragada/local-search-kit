@@ -24,3 +24,4 @@ class ReportTests(unittest.TestCase):
             result=subprocess.run([sys.executable,'app.py','examples','keyword','--index',str(db),'--format','markdown'],capture_output=True,text=True)
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertIn('# Local Search Report',result.stdout);self.assertIn('notes.md',result.stdout)
+
