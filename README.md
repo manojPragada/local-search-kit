@@ -2,7 +2,7 @@
 
 Search local Markdown and text files offline, returning ranked excerpts with file paths and line numbers.
 
-**Status:** runnable CLI foundation. No hosted demo or dashboard is available yet. Examples use synthetic offline data. Python 3.10+; standard library only. Validated with Python 3.12.
+**Status:** runnable CLI plus standalone local results UI. No hosted demo is available. Examples use synthetic offline data. Python 3.10+; standard library only. Validated with Python 3.12.
 
 ## Quick start
 
@@ -39,13 +39,21 @@ python app.py examples "keyword source" --format markdown
 python app.py examples "keyword source" --index /tmp/local-search-demo.sqlite3 --format markdown
 ```
 
-JSON remains the default. Markdown output includes the query, ranked matches, relative file/line citations, excerpts and query-word coverage percentages. Percentages are lexical match coverage, not semantic confidence. Source paths and document text are formatted as literal code; citations are plain references rather than links that pretend to jump to local line numbers. Reports may contain private document excerpts: review before sharing. If redirecting output to a file, put it outside the search folder to avoid indexing your previous reports. No web UI is implemented yet.
+JSON remains the default. Markdown output includes the query, ranked matches, relative file/line citations, excerpts and query-word coverage percentages. Percentages are lexical match coverage, not semantic confidence. Source paths and document text are formatted as literal code. Reports may contain private document excerpts: review before sharing.
+
+For a responsive local results interface with clickable citations:
+
+```bash
+python app.py examples "keyword source" --format html --output search-report.html
+```
+
+Open `search-report.html` in a browser. The report contains no external requests and is created exclusively rather than overwriting a file. Citations use local `file:` URLs with a conventional `#L` fragment; opening and line scrolling depend on browser/OS support. The report embeds excerpts and absolute local file URLs, so keep it private. HTML files are not indexed by this tool.
 
 ## Development and verification
 
 ```bash
 python -m unittest discover -s tests -v
-python -m compileall -q app.py tests
+python -m compileall -q app.py reporting.py web_report.py tests
 ```
 
 Tests exercise temporary documents and SQLite indexes, including updates, deletions, root binding and unchanged-file reuse. There is no build step or configured linter; compilation is a syntax check, not linting.
@@ -59,6 +67,7 @@ Configuration is provided through CLI arguments. No environment variables, `.env
 ```text
 app.py          CLI and search/index logic
 reporting.py    literal-text Markdown result reports
+web_report.py   standalone responsive HTML result renderer
 examples/       synthetic example inputs
 tests/          behavioral unit tests
 ROADMAP.md      completed work and prioritized next steps
@@ -82,7 +91,7 @@ A single dependency-free module exposes importable core functions and a CLI entr
 
 ## Limitations
 
-Only UTF-8 `.txt` and `.md` files up to 1 MiB are considered. Hidden paths, symlinks and unreadable files are skipped. The default mode scans files afresh; optional indexed mode persists tokenized lines. There is no semantic search, PDF extraction or UI yet. Use a trusted folder; this is not a sandbox against concurrent malicious filesystem changes.
+Only UTF-8 `.txt` and `.md` files up to 1 MiB are considered. Hidden paths, symlinks and unreadable files are skipped. The default mode scans files afresh; optional indexed mode persists tokenized lines. There is no semantic search or PDF extraction. Use a trusted folder; this is not a sandbox against concurrent malicious filesystem changes.
 
 ## Running and deployment
 

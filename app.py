@@ -102,10 +102,17 @@ def indexed_search(folder, query, database, limit=10, match='any'):
         db.close()
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown'],default='json');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown','html'],default='json');p.add_argument('--output',help='Required exclusive output file for HTML format');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');a=p.parse_args()
     try:
         results = indexed_search(a.folder,a.query,a.index,a.limit,a.match) if a.index else search(a.folder,a.query,a.limit,a.match)
-        print(markdown_report(a.query,results) if a.format=='markdown' else json.dumps(results,indent=2));return 0
+        if a.format=='html':
+            if not a.output:raise ValueError('--output is required for HTML format')
+            from web_report import html_report
+            with open(a.output,'x',encoding='utf-8') as output:output.write(html_report(a.query,results,a.folder))
+            print(a.output)
+        elif a.output:raise ValueError('--output is only supported with HTML format')
+        else:print(markdown_report(a.query,results) if a.format=='markdown' else json.dumps(results,indent=2))
+        return 0
     except (OSError,ValueError,sqlite3.Error) as exc:print(str(exc),file=sys.stderr);return 2
 if __name__=='__main__':sys.exit(main())
 

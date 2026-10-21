@@ -10,10 +10,12 @@
 
 - [x] Add persistent index with incremental file updates
 - [x] Add readable Markdown result reports with line citations
-- [ ] Build local results UI with clickable source citations
+- [x] Build local results UI with clickable source citations
 - [ ] Add optional embeddings and local model adapters
 
 ## Continuity
+
+2026-10-21: Added a responsive standalone HTML results UI with literal excerpts, lexical coverage labels, visible empty state and clickable file/line citations. Output uses exclusive creation and makes no network requests. Next: optional embeddings and clearly separated local model adapters.
 
 2026-10-20: Added --match all for same-line conjunction of distinct query words, preserving default any-word ranking. Shared direct/indexed matching and stricter argument validation; seven tests cover Unicode, duplicates, parity, refresh and CLI JSON/Markdown. Next: local source-citation UI; no semantic search or dashboard claimed.
 
