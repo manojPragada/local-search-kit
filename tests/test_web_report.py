@@ -10,3 +10,6 @@ class WebReportTests(unittest.TestCase):
             self.assertIn('API &lt;token&gt;',html);self.assertNotIn('Use <local>',html)
     def test_empty_state_is_visible(self):
         self.assertIn('<p id="empty" >',html_report('missing',[],'.'))
+    def test_context_lines_are_escaped_and_match_is_highlighted(self):
+        html=html_report('needle',[{'source':'a.md','line':2,'score':1,'excerpt':'needle','context':[{'line':1,'text':'<before>','match':False},{'line':2,'text':'needle','match':True}]}],'.')
+        self.assertIn('&lt;before&gt;',html);self.assertIn('class="match"',html)

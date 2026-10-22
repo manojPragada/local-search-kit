@@ -21,6 +21,8 @@ def markdown_report(query, results):
                   'Source: ' + code_span(citation), '', 'Excerpt:', '']
         # Indented code prevents document text from becoming active HTML or Markdown.
         lines += ['    ' + line for line in result['excerpt'].splitlines() or ['']]
+        if result.get('context'):
+            lines += ['', 'Context:','']+['    '+('> ' if line['match'] else '  ')+str(line['line'])+': '+line['text'] for line in result['context']]
         lines += ['']
     return '\n'.join(lines)
 

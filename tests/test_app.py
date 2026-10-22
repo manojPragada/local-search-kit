@@ -1,7 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
-from app import search,indexed_search,sync_index
+from app import search,indexed_search,sync_index,add_context
 class Tests(unittest.TestCase):
     def test_rank_and_citation(self):
         with tempfile.TemporaryDirectory() as d:
@@ -18,6 +18,11 @@ class Tests(unittest.TestCase):
     def test_limit(self):
         with tempfile.TemporaryDirectory() as d:
             Path(d,'a.txt').write_text('word\nword\nword');self.assertEqual(len(search(d,'word',1)),1)
+    def test_context_is_bounded_and_marks_the_citation_line(self):
+        with tempfile.TemporaryDirectory() as d:
+            Path(d,'a.txt').write_text('before\nneedle\nafter\nlast')
+            result=add_context(d,search(d,'needle'),1)[0];self.assertEqual([line['line'] for line in result['context']],[1,2,3]);self.assertEqual([line['match'] for line in result['context']],[False,True,False])
+            with self.assertRaises(ValueError):add_context(d,[],6)
 
 
     def test_indexed_results_match_scan_and_persist(self):

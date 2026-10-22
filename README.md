@@ -22,6 +22,12 @@ Results rank by the fraction of distinct query words matched on a single line, t
 
 Run `python app.py --help` for available options.
 
+Use `--context 0..5` to include neighboring source lines around each citation in JSON, Markdown and HTML output. The exact matching line is marked separately in context views; ranking and citation line numbers do not change. Context is read locally after matching and is never sent elsewhere.
+
+```bash
+python app.py examples "keyword source" --context 2 --format html --output search-report.html
+```
+
 ## Persistent incremental index
 
 ```bash

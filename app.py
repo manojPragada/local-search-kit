@@ -101,10 +101,25 @@ def indexed_search(folder, query, database, limit=10, match='any'):
     finally:
         db.close()
 
+def add_context(folder,results,context=0):
+    if type(context) is not int or not 0<=context<=5:raise ValueError('Context must be an integer from 0 to 5')
+    if context==0:return results
+    root=Path(folder).resolve();cache={}
+    enriched=[]
+    for result in results:
+        path=(root/result['source']).resolve()
+        if not path.is_relative_to(root):raise ValueError('Result source escaped search root')
+        try:lines=cache.setdefault(result['source'],path.read_text(encoding='utf-8').splitlines())
+        except (OSError,UnicodeError):enriched.append(result);continue
+        start=max(1,result['line']-context);end=min(len(lines),result['line']+context)
+        enriched.append(dict(result,context=[{'line':number,'text':lines[number-1][:300],'match':number==result['line']} for number in range(start,end+1)]))
+    return enriched
+
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown','html'],default='json');p.add_argument('--output',help='Required exclusive output file for HTML format');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--context',type=int,default=0,metavar='LINES',help='Include 0–5 neighboring lines around each match');p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown','html'],default='json');p.add_argument('--output',help='Required exclusive output file for HTML format');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');a=p.parse_args()
     try:
         results = indexed_search(a.folder,a.query,a.index,a.limit,a.match) if a.index else search(a.folder,a.query,a.limit,a.match)
+        results=add_context(a.folder,results,a.context)
         if a.format=='html':
             if not a.output:raise ValueError('--output is required for HTML format')
             from web_report import html_report
