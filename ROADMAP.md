@@ -11,9 +11,12 @@
 - [x] Add persistent index with incremental file updates
 - [x] Add readable Markdown result reports with line citations
 - [x] Build local results UI with clickable source citations
-- [ ] Add optional embeddings and local model adapters
+- [x] Define bounded local reranker adapter contract
+- [ ] Add benchmarked local embedding/model example
 
 ## Continuity
+
+2026-10-24: Added an opt-in local executable reranker protocol. It receives only query/excerpt/lexical-score candidates, must return one bounded score per input, times out after 10 seconds and can reorder but never invent citations. Next: a benchmarked local-model example kept separate from default lexical ranking.
 
 2026-10-22: Added bounded 0–5-line source context across direct/indexed JSON, Markdown and HTML results, with the cited line visibly distinguished and escaped. Next: define a stable optional local-model adapter contract without making semantic claims about lexical results.
 

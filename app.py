@@ -116,9 +116,12 @@ def add_context(folder,results,context=0):
     return enriched
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--context',type=int,default=0,metavar='LINES',help='Include 0–5 neighboring lines around each match');p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown','html'],default='json');p.add_argument('--output',help='Required exclusive output file for HTML format');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('folder');p.add_argument('query');p.add_argument('--limit',type=int,default=10);p.add_argument('--context',type=int,default=0,metavar='LINES',help='Include 0–5 neighboring lines around each match');p.add_argument('--index',metavar='SQLITE_FILE',help='Maintain and query a local incremental index');p.add_argument('--format',choices=['json','markdown','html'],default='json');p.add_argument('--output',help='Required exclusive output file for HTML format');p.add_argument('--match',choices=['any','all'],default='any',help='Match any query word (default) or all distinct query words on the same line');p.add_argument('--reranker',metavar='EXECUTABLE',help='Optional local executable implementing the documented bounded score protocol');a=p.parse_args()
     try:
         results = indexed_search(a.folder,a.query,a.index,a.limit,a.match) if a.index else search(a.folder,a.query,a.limit,a.match)
+        if a.reranker:
+            from reranker import rerank_results
+            results=rerank_results(a.query,results,a.reranker)
         results=add_context(a.folder,results,a.context)
         if a.format=='html':
             if not a.output:raise ValueError('--output is required for HTML format')

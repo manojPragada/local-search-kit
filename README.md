@@ -22,6 +22,12 @@ Results rank by the fraction of distinct query words matched on a single line, t
 
 Run `python app.py --help` for available options.
 
+### Optional local reranker protocol
+
+`--reranker /absolute/path/to/executable` sends a versioned JSON object containing the query and already-selected candidate excerpts plus lexical scores to a local executable over standard input. The executable must return a JSON array with one finite score from 0 to 1 per candidate within ten seconds. Scores only reorder the existing lexical results: the adapter does not provide file paths or line numbers to the model, so it cannot invent citations. A rerank score is model-specific ordering metadata, not confidence or relevance truth.
+
+The executable is code you choose to run with your own permissions. No reranker is bundled, downloaded or contacted by default; validate and sandbox third-party models yourself.
+
 Use `--context 0..5` to include neighboring source lines around each citation in JSON, Markdown and HTML output. The exact matching line is marked separately in context views; ranking and citation line numbers do not change. Context is read locally after matching and is never sent elsewhere.
 
 ```bash
@@ -59,7 +65,7 @@ Open `search-report.html` in a browser. The report contains no external requests
 
 ```bash
 python -m unittest discover -s tests -v
-python -m compileall -q app.py reporting.py web_report.py tests
+python -m compileall -q app.py reporting.py reranker.py web_report.py tests
 ```
 
 Tests exercise temporary documents and SQLite indexes, including updates, deletions, root binding and unchanged-file reuse. There is no build step or configured linter; compilation is a syntax check, not linting.
@@ -73,6 +79,7 @@ Configuration is provided through CLI arguments. No environment variables, `.env
 ```text
 app.py          CLI and search/index logic
 reporting.py    literal-text Markdown result reports
+reranker.py     bounded optional local executable adapter
 web_report.py   standalone responsive HTML result renderer
 examples/       synthetic example inputs
 tests/          behavioral unit tests
