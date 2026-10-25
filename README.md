@@ -28,6 +28,14 @@ Run `python app.py --help` for available options.
 
 The executable is code you choose to run with your own permissions. No reranker is bundled, downloaded or contacted by default; validate and sandbox third-party models yourself.
 
+Evaluate a candidate local model against a small, human-labelled JSON set before trusting its ordering:
+
+```bash
+python benchmark.py examples/benchmark.json /absolute/path/to/reranker
+```
+
+Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1 accuracy and mean reciprocal rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
+
 Use `--context 0..5` to include neighboring source lines around each citation in JSON, Markdown and HTML output. The exact matching line is marked separately in context views; ranking and citation line numbers do not change. Context is read locally after matching and is never sent elsewhere.
 
 ```bash
@@ -65,7 +73,7 @@ Open `search-report.html` in a browser. The report contains no external requests
 
 ```bash
 python -m unittest discover -s tests -v
-python -m compileall -q app.py reporting.py reranker.py web_report.py tests
+python -m compileall -q app.py benchmark.py reporting.py reranker.py web_report.py tests
 ```
 
 Tests exercise temporary documents and SQLite indexes, including updates, deletions, root binding and unchanged-file reuse. There is no build step or configured linter; compilation is a syntax check, not linting.
@@ -80,6 +88,7 @@ Configuration is provided through CLI arguments. No environment variables, `.env
 app.py          CLI and search/index logic
 reporting.py    literal-text Markdown result reports
 reranker.py     bounded optional local executable adapter
+benchmark.py    bounded offline reranker evaluation harness
 web_report.py   standalone responsive HTML result renderer
 examples/       synthetic example inputs
 tests/          behavioral unit tests

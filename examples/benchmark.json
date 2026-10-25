@@ -1,0 +1,4 @@
+[
+  {"query":"offline citations","candidates":["A hosted search service","Local results with file and line citations"],"relevant":1},
+  {"query":"incremental index","candidates":["Rebuild every document","Reuse unchanged document hashes"],"relevant":1}
+]

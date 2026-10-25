@@ -16,6 +16,8 @@
 
 ## Continuity
 
+2026-10-25: Added a bounded offline reranker evaluation harness with top-1 accuracy and mean reciprocal rank plus a clearly labelled two-case protocol smoke test. Next: document a reproducible local embedding model result without making general quality claims.
+
 2026-10-24: Added an opt-in local executable reranker protocol. It receives only query/excerpt/lexical-score candidates, must return one bounded score per input, times out after 10 seconds and can reorder but never invent citations. Next: a benchmarked local-model example kept separate from default lexical ranking.
 
 2026-10-22: Added bounded 0–5-line source context across direct/indexed JSON, Markdown and HTML results, with the cited line visibly distinguished and escaped. Next: define a stable optional local-model adapter contract without making semantic claims about lexical results.
