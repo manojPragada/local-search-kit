@@ -12,9 +12,12 @@
 - [x] Add readable Markdown result reports with line citations
 - [x] Build local results UI with clickable source citations
 - [x] Define bounded local reranker adapter contract
-- [ ] Add benchmarked local embedding/model example
+- [x] Add a reproducible local statistical reranker baseline
+- [ ] Add an optional embedding example only with measured benefit over the baseline
 
 ## Continuity
+
+2026-10-26: Added a dependency-free TF-IDF reranker executable and testable benchmark command. It is explicitly a lexical statistical baseline, not semantic search. Next: consider an optional embedding example only after measuring improvement on representative labelled cases.
 
 2026-10-25: Added a bounded offline reranker evaluation harness with top-1 accuracy and mean reciprocal rank plus a clearly labelled two-case protocol smoke test. Next: document a reproducible local embedding model result without making general quality claims.
 

@@ -36,6 +36,15 @@ python benchmark.py examples/benchmark.json /absolute/path/to/reranker
 
 Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1 accuracy and mean reciprocal rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
 
+`examples/tfidf_reranker.py` is a dependency-free local statistical baseline implementing the protocol. It scores only query-word overlap using TF-IDF; it is not an embedding model, does not understand meaning and cannot retrieve candidates missed by lexical search. Run it reproducibly with:
+
+```bash
+chmod +x examples/tfidf_reranker.py
+python benchmark.py examples/benchmark.json ./examples/tfidf_reranker.py
+```
+
+On the bundled two-case smoke set this baseline produces top-1 accuracy `0.5` and mean reciprocal rank `0.75`. Those two synthetic cases are far too small for a quality claim; the numbers exist only to make the example reproducible and comparable with future adapters.
+
 Use `--context 0..5` to include neighboring source lines around each citation in JSON, Markdown and HTML output. The exact matching line is marked separately in context views; ranking and citation line numbers do not change. Context is read locally after matching and is never sent elsewhere.
 
 ```bash
@@ -73,7 +82,7 @@ Open `search-report.html` in a browser. The report contains no external requests
 
 ```bash
 python -m unittest discover -s tests -v
-python -m compileall -q app.py benchmark.py reporting.py reranker.py web_report.py tests
+python -m compileall -q app.py benchmark.py reporting.py reranker.py web_report.py examples/tfidf_reranker.py tests
 ```
 
 Tests exercise temporary documents and SQLite indexes, including updates, deletions, root binding and unchanged-file reuse. There is no build step or configured linter; compilation is a syntax check, not linting.
