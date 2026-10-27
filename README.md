@@ -18,6 +18,8 @@ Use `python3` if your system does not provide `python`. No package installation 
 
 ## Usage and behavior
 
+Benchmark JSON now includes bounded per-case rank and candidate-count diagnostics alongside aggregate top-1 accuracy and mean reciprocal rank, making regressions inspectable without changing ranking behavior.
+
 Results rank by the fraction of distinct query words matched on a single line, then by path and line for deterministic ties. Matching is case-insensitive and Unicode-aware. Citations are relative file paths and one-based line numbers.
 
 Run `python app.py --help` for available options.
