@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-10-28: Added a validated metric-comparison helper for reporting candidate deltas against the same labelled baseline cases. Next: require any optional embedding example to show its measured delta on a representative corpus.
+
 2026-10-27: Added bounded per-case rank diagnostics to benchmark output so regressions are inspectable instead of hidden behind aggregate top-1/MRR values. Next: measure any optional embedding example against the same labelled cases.
 
 2026-10-26: Added a dependency-free TF-IDF reranker executable and testable benchmark command. It is explicitly a lexical statistical baseline, not semantic search. Next: consider an optional embedding example only after measuring improvement on representative labelled cases.

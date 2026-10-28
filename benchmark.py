@@ -18,6 +18,10 @@ def evaluate(cases,command,runner=None,include_cases=False):
     result={'cases':len(cases),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases)}
     if include_cases:result['case_ranks']=ranks
     return result
+def compare_metrics(baseline,candidate):
+    for result in (baseline,candidate):
+        if not isinstance(result,dict) or not all(type(result.get(key)) in (int,float) for key in ('mean_reciprocal_rank','top_1_accuracy')):raise ValueError('Both benchmark results require numeric MRR and top-1 accuracy')
+    return {'mean_reciprocal_rank_delta':candidate['mean_reciprocal_rank']-baseline['mean_reciprocal_rank'],'top_1_accuracy_delta':candidate['top_1_accuracy']-baseline['top_1_accuracy']}
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('cases');parser.add_argument('reranker');args=parser.parse_args()
