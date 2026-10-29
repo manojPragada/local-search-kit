@@ -22,6 +22,17 @@ def compare_metrics(baseline,candidate):
     for result in (baseline,candidate):
         if not isinstance(result,dict) or not all(type(result.get(key)) in (int,float) for key in ('mean_reciprocal_rank','top_1_accuracy')):raise ValueError('Both benchmark results require numeric MRR and top-1 accuracy')
     return {'mean_reciprocal_rank_delta':candidate['mean_reciprocal_rank']-baseline['mean_reciprocal_rank'],'top_1_accuracy_delta':candidate['top_1_accuracy']-baseline['top_1_accuracy']}
+def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
+    """Conservatively decide whether an optional reranker merits documentation."""
+    for result in (baseline,candidate):
+        if type(result.get('cases')) is not int or result['cases']<1:raise ValueError('Both benchmark results require a positive case count')
+    if baseline['cases']!=candidate['cases']:raise ValueError('Benchmark results must use the same cases')
+    deltas=compare_metrics(baseline,candidate)
+    reasons=[]
+    if candidate['cases']<minimum_cases:reasons.append(f'requires at least {minimum_cases} labelled cases')
+    if deltas['mean_reciprocal_rank_delta']<minimum_mrr_delta:reasons.append(f'MRR delta below {minimum_mrr_delta:g}')
+    if deltas['top_1_accuracy_delta']<0:reasons.append('top-1 accuracy regressed')
+    return {'promote':not reasons,'reasons':reasons,**deltas}
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('cases');parser.add_argument('reranker');args=parser.parse_args()
