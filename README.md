@@ -20,7 +20,7 @@ Use `python3` if your system does not provide `python`. No package installation 
 
 `benchmark.compare_metrics` reports candidate-minus-baseline MRR and top-1 deltas only when both results use numeric metrics; it does not claim statistical significance or general quality.
 
-`benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must use the same cases, default to at least 20 labelled cases, improve MRR by at least 0.02 and avoid a top-1 regression. Passing is evidence for this corpus only, never a general semantic-quality claim.
+`benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must have the same canonical case-set SHA-256 fingerprint, default to at least 20 labelled cases, improve MRR by at least 0.02 and avoid a top-1 regression. The fingerprint identifies benchmark inputs; it is not a secrecy or integrity guarantee. Passing is evidence for this corpus only, never a general semantic-quality claim.
 
 Benchmark JSON now includes bounded per-case rank and candidate-count diagnostics alongside aggregate top-1 accuracy and mean reciprocal rank, making regressions inspectable without changing ranking behavior.
 

@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-10-30: Added a canonical SHA-256 fingerprint to benchmark output and now require matching fingerprints at the promotion gate, preventing equal-sized but different corpora from being compared accidentally. Next: evaluate an optional embedding example only when it can clear this gate.
+
 2026-10-29: Added a conservative promotion gate requiring the same representative labelled cases, a configurable MRR gain and no top-1 regression. Next: evaluate an optional embedding example only when it can clear this gate.
 
 2026-10-28: Added a validated metric-comparison helper for reporting candidate deltas against the same labelled baseline cases. Next: require any optional embedding example to show its measured delta on a representative corpus.

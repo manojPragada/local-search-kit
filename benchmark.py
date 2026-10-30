@@ -1,5 +1,5 @@
 """Offline evaluation harness for local reranker executables."""
-import argparse,json,sys
+import argparse,hashlib,json,sys
 from pathlib import Path
 from reranker import rerank_results
 
@@ -15,7 +15,8 @@ def evaluate(cases,command,runner=None,include_cases=False):
         kwargs={'runner':runner} if runner else {}
         ranked=rerank_results(case['query'],results,command,**kwargs);rank=next(i for i,item in enumerate(ranked,1) if int(item['source'])==relevant)
         reciprocal.append(1/rank);top1+=rank==1;ranks.append({'case':number,'rank':rank,'candidates':len(candidates)})
-    result={'cases':len(cases),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases)}
+    encoded=json.dumps(cases,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
+    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases)}
     if include_cases:result['case_ranks']=ranks
     return result
 def compare_metrics(baseline,candidate):
@@ -26,7 +27,10 @@ def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     """Conservatively decide whether an optional reranker merits documentation."""
     for result in (baseline,candidate):
         if type(result.get('cases')) is not int or result['cases']<1:raise ValueError('Both benchmark results require a positive case count')
+        fingerprint=result.get('case_set_sha256')
+        if not isinstance(fingerprint,str) or len(fingerprint)!=64 or any(ch not in '0123456789abcdef' for ch in fingerprint):raise ValueError('Both benchmark results require a valid case-set fingerprint')
     if baseline['cases']!=candidate['cases']:raise ValueError('Benchmark results must use the same cases')
+    if baseline['case_set_sha256']!=candidate['case_set_sha256']:raise ValueError('Benchmark results must use the same fingerprinted case set')
     deltas=compare_metrics(baseline,candidate)
     reasons=[]
     if candidate['cases']<minimum_cases:reasons.append(f'requires at least {minimum_cases} labelled cases')
