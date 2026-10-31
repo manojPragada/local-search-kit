@@ -23,6 +23,14 @@ def compare_metrics(baseline,candidate):
     for result in (baseline,candidate):
         if not isinstance(result,dict) or not all(type(result.get(key)) in (int,float) for key in ('mean_reciprocal_rank','top_1_accuracy')):raise ValueError('Both benchmark results require numeric MRR and top-1 accuracy')
     return {'mean_reciprocal_rank_delta':candidate['mean_reciprocal_rank']-baseline['mean_reciprocal_rank'],'top_1_accuracy_delta':candidate['top_1_accuracy']-baseline['top_1_accuracy']}
+def compare_case_ranks(baseline,candidate):
+    old,new=baseline.get('case_ranks'),candidate.get('case_ranks')
+    if not isinstance(old,list) or not isinstance(new,list) or len(old)!=len(new) or not old:raise ValueError('Both benchmark results require aligned non-empty case ranks')
+    deltas=[]
+    for before,after in zip(old,new):
+        if not all(isinstance(item,dict) for item in (before,after)) or before.get('case')!=after.get('case') or before.get('candidates')!=after.get('candidates') or type(before.get('rank')) is not int or type(after.get('rank')) is not int:raise ValueError('Case-rank diagnostics must align by case and candidate count')
+        deltas.append(after['rank']-before['rank'])
+    return {'improved_cases':sum(delta<0 for delta in deltas),'unchanged_cases':sum(delta==0 for delta in deltas),'regressed_cases':sum(delta>0 for delta in deltas),'worst_rank_regression':max(0,max(deltas))}
 def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     """Conservatively decide whether an optional reranker merits documentation."""
     for result in (baseline,candidate):
@@ -36,7 +44,11 @@ def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     if candidate['cases']<minimum_cases:reasons.append(f'requires at least {minimum_cases} labelled cases')
     if deltas['mean_reciprocal_rank_delta']<minimum_mrr_delta:reasons.append(f'MRR delta below {minimum_mrr_delta:g}')
     if deltas['top_1_accuracy_delta']<0:reasons.append('top-1 accuracy regressed')
-    return {'promote':not reasons,'reasons':reasons,**deltas}
+    diagnostics={}
+    if 'case_ranks' in baseline or 'case_ranks' in candidate:
+        diagnostics=compare_case_ranks(baseline,candidate)
+        if diagnostics['regressed_cases']:reasons.append(f"{diagnostics['regressed_cases']} individual case ranks regressed")
+    return {'promote':not reasons,'reasons':reasons,**deltas,**diagnostics}
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('cases');parser.add_argument('reranker');args=parser.parse_args()
