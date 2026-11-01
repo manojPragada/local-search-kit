@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-11-01: Added median relevant-result rank to benchmark output alongside MRR, top-1 accuracy and optional per-case ranks. This exposes typical placement without changing the conservative promotion gate. Next: evaluate an optional embedding example only when it can clear this gate.
+
 2026-10-31: Added aligned per-case rank comparison and made any supplied individual regression block promotion, preventing aggregate MRR gains from hiding query-level harm. Next: evaluate an optional embedding example only when it can clear this gate.
 
 2026-10-30: Added a canonical SHA-256 fingerprint to benchmark output and now require matching fingerprints at the promotion gate, preventing equal-sized but different corpora from being compared accidentally. Next: evaluate an optional embedding example only when it can clear this gate.

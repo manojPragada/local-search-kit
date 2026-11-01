@@ -40,7 +40,7 @@ Evaluate a candidate local model against a small, human-labelled JSON set before
 python benchmark.py examples/benchmark.json /absolute/path/to/reranker
 ```
 
-Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1 accuracy and mean reciprocal rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
+Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1 accuracy, mean reciprocal rank and median relevant-result rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
 
 `examples/tfidf_reranker.py` is a dependency-free local statistical baseline implementing the protocol. It scores only query-word overlap using TF-IDF; it is not an embedding model, does not understand meaning and cannot retrieve candidates missed by lexical search. Run it reproducibly with:
 

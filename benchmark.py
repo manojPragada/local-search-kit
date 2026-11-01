@@ -1,5 +1,5 @@
 """Offline evaluation harness for local reranker executables."""
-import argparse,hashlib,json,sys
+import argparse,hashlib,json,statistics,sys
 from pathlib import Path
 from reranker import rerank_results
 
@@ -16,7 +16,7 @@ def evaluate(cases,command,runner=None,include_cases=False):
         ranked=rerank_results(case['query'],results,command,**kwargs);rank=next(i for i,item in enumerate(ranked,1) if int(item['source'])==relevant)
         reciprocal.append(1/rank);top1+=rank==1;ranks.append({'case':number,'rank':rank,'candidates':len(candidates)})
     encoded=json.dumps(cases,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
-    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases)}
+    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases),'median_rank':statistics.median(item['rank'] for item in ranks)}
     if include_cases:result['case_ranks']=ranks
     return result
 def compare_metrics(baseline,candidate):
