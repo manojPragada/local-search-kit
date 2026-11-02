@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-11-02: Added top-3 accuracy to benchmark output and optional candidate-minus-baseline deltas. The conservative promotion gate remains unchanged, while near-miss retrieval is now visible. Next: evaluate an optional embedding example only when it can clear this gate.
+
 2026-11-01: Added median relevant-result rank to benchmark output alongside MRR, top-1 accuracy and optional per-case ranks. This exposes typical placement without changing the conservative promotion gate. Next: evaluate an optional embedding example only when it can clear this gate.
 
 2026-10-31: Added aligned per-case rank comparison and made any supplied individual regression block promotion, preventing aggregate MRR gains from hiding query-level harm. Next: evaluate an optional embedding example only when it can clear this gate.

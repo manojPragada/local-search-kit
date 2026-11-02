@@ -18,7 +18,7 @@ Use `python3` if your system does not provide `python`. No package installation 
 
 ## Usage and behavior
 
-`benchmark.compare_metrics` reports candidate-minus-baseline MRR and top-1 deltas only when both results use numeric metrics; it does not claim statistical significance or general quality.
+`benchmark.compare_metrics` reports candidate-minus-baseline MRR and top-1 deltas, plus a top-3 delta when both results include that metric; it does not claim statistical significance or general quality.
 
 `benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must have the same canonical case-set SHA-256 fingerprint, default to at least 20 labelled cases, improve MRR by at least 0.02 and avoid a top-1 regression. When per-case diagnostics are supplied, any individual rank regression also blocks promotion and the result reports improved, unchanged and regressed case counts plus the worst regression. The fingerprint identifies benchmark inputs; it is not a secrecy or integrity guarantee. Passing is evidence for this corpus only, never a general semantic-quality claim.
 
@@ -40,7 +40,7 @@ Evaluate a candidate local model against a small, human-labelled JSON set before
 python benchmark.py examples/benchmark.json /absolute/path/to/reranker
 ```
 
-Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1 accuracy, mean reciprocal rank and median relevant-result rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
+Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1 and top-3 accuracy, mean reciprocal rank and median relevant-result rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
 
 `examples/tfidf_reranker.py` is a dependency-free local statistical baseline implementing the protocol. It scores only query-word overlap using TF-IDF; it is not an embedding model, does not understand meaning and cannot retrieve candidates missed by lexical search. Run it reproducibly with:
 
