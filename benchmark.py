@@ -26,6 +26,9 @@ def compare_metrics(baseline,candidate):
     if 'top_3_accuracy' in baseline or 'top_3_accuracy' in candidate:
         if not all(type(result.get('top_3_accuracy')) in (int,float) for result in (baseline,candidate)):raise ValueError('Both benchmark results require numeric top-3 accuracy when either supplies it')
         deltas['top_3_accuracy_delta']=candidate['top_3_accuracy']-baseline['top_3_accuracy']
+    if 'median_rank' in baseline or 'median_rank' in candidate:
+        if not all(type(result.get('median_rank')) in (int,float) for result in (baseline,candidate)):raise ValueError('Both benchmark results require numeric median rank when either supplies it')
+        deltas['median_rank_delta']=candidate['median_rank']-baseline['median_rank']
     return deltas
 def compare_case_ranks(baseline,candidate):
     old,new=baseline.get('case_ranks'),candidate.get('case_ranks')

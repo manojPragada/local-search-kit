@@ -18,7 +18,7 @@ Use `python3` if your system does not provide `python`. No package installation 
 
 ## Usage and behavior
 
-`benchmark.compare_metrics` reports candidate-minus-baseline MRR and top-1 deltas, plus a top-3 delta when both results include that metric; it does not claim statistical significance or general quality.
+`benchmark.compare_metrics` reports candidate-minus-baseline MRR and top-1 deltas, plus top-3 and median-rank deltas when both results include those metrics. A negative median-rank delta means better typical placement; none of these values claims statistical significance or general quality.
 
 `benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must have the same canonical case-set SHA-256 fingerprint, default to at least 20 labelled cases, improve MRR by at least 0.02 and avoid a top-1 regression. When per-case diagnostics are supplied, any individual rank regression also blocks promotion and the result reports improved, unchanged and regressed case counts plus the worst regression. The fingerprint identifies benchmark inputs; it is not a secrecy or integrity guarantee. Passing is evidence for this corpus only, never a general semantic-quality claim.
 
