@@ -16,7 +16,7 @@ def evaluate(cases,command,runner=None,include_cases=False):
         ranked=rerank_results(case['query'],results,command,**kwargs);rank=next(i for i,item in enumerate(ranked,1) if int(item['source'])==relevant)
         reciprocal.append(1/rank);top1+=rank==1;top3+=rank<=3;ranks.append({'case':number,'rank':rank,'candidates':len(candidates)})
     encoded=json.dumps(cases,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
-    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases),'top_3_accuracy':top3/len(cases),'median_rank':statistics.median(item['rank'] for item in ranks)}
+    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases),'top_3_accuracy':top3/len(cases),'median_rank':statistics.median(item['rank'] for item in ranks),'worst_rank':max(item['rank'] for item in ranks)}
     if include_cases:result['case_ranks']=ranks
     return result
 def compare_metrics(baseline,candidate):
@@ -29,6 +29,9 @@ def compare_metrics(baseline,candidate):
     if 'median_rank' in baseline or 'median_rank' in candidate:
         if not all(type(result.get('median_rank')) in (int,float) for result in (baseline,candidate)):raise ValueError('Both benchmark results require numeric median rank when either supplies it')
         deltas['median_rank_delta']=candidate['median_rank']-baseline['median_rank']
+    if 'worst_rank' in baseline or 'worst_rank' in candidate:
+        if not all(type(result.get('worst_rank')) is int and result['worst_rank']>=1 for result in (baseline,candidate)):raise ValueError('Both benchmark results require positive integer worst rank when either supplies it')
+        deltas['worst_rank_delta']=candidate['worst_rank']-baseline['worst_rank']
     return deltas
 def compare_case_ranks(baseline,candidate):
     old,new=baseline.get('case_ranks'),candidate.get('case_ranks')
