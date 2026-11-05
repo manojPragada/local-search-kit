@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-11-05: Made a supplied worst-rank regression block benchmark promotion even when per-case diagnostics are omitted, preventing aggregate gains from hiding a degraded tail case. Next: evaluate an optional embedding example only when it can clear this gate.
+
 2026-11-04: Added worst relevant-result rank to benchmark output and optional candidate-minus-baseline deltas. Negative deltas indicate an improved worst case; the conservative promotion gate remains unchanged. Next: evaluate an optional embedding example only when it can clear this gate.
 
 2026-11-03: Added optional candidate-minus-baseline median-rank deltas to benchmark comparisons. Negative values indicate improved typical placement; the conservative promotion gate remains unchanged. Next: evaluate an optional embedding example only when it can clear this gate.

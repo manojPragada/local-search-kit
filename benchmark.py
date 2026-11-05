@@ -54,6 +54,7 @@ def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     if candidate['cases']<minimum_cases:reasons.append(f'requires at least {minimum_cases} labelled cases')
     if deltas['mean_reciprocal_rank_delta']<minimum_mrr_delta:reasons.append(f'MRR delta below {minimum_mrr_delta:g}')
     if deltas['top_1_accuracy_delta']<0:reasons.append('top-1 accuracy regressed')
+    if deltas.get('worst_rank_delta',0)>0:reasons.append('worst relevant-result rank regressed')
     diagnostics={}
     if 'case_ranks' in baseline or 'case_ranks' in candidate:
         diagnostics=compare_case_ranks(baseline,candidate)
