@@ -20,6 +20,9 @@ class GateTests(unittest.TestCase):
  def test_top_three_regression_blocks_promotion(self):
   base={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'top_3_accuracy':.8};candidate={**base,'mean_reciprocal_rank':.55,'top_3_accuracy':.75}
   result=promotion_gate(base,candidate);self.assertFalse(result['promote']);self.assertIn('top-3 accuracy regressed',result['reasons'])
+ def test_top_five_regression_blocks_promotion(self):
+  base={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'top_5_accuracy':.9};candidate={**base,'mean_reciprocal_rank':.55,'top_5_accuracy':.85}
+  result=promotion_gate(base,candidate);self.assertFalse(result['promote']);self.assertIn('top-5 accuracy regressed',result['reasons'])
  def test_median_rank_regression_blocks_promotion(self):
   base={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'median_rank':2};candidate={**base,'mean_reciprocal_rank':.55,'median_rank':3}
   result=promotion_gate(base,candidate);self.assertFalse(result['promote']);self.assertIn('median relevant-result rank regressed',result['reasons'])

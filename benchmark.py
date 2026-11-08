@@ -5,7 +5,7 @@ from reranker import rerank_results
 
 def evaluate(cases,command,runner=None,include_cases=False):
     if not isinstance(cases,list) or not 1<=len(cases)<=100:raise ValueError('Benchmark must contain 1–100 cases')
-    reciprocal=[];top1=0;top3=0;ranks=[]
+    reciprocal=[];top1=0;top3=0;top5=0;ranks=[]
     for number,case in enumerate(cases,1):
         if not isinstance(case,dict) or not isinstance(case.get('query'),str) or not case['query'].strip():raise ValueError(f'Case {number} requires a query')
         candidates=case.get('candidates');relevant=case.get('relevant')
@@ -14,9 +14,9 @@ def evaluate(cases,command,runner=None,include_cases=False):
         results=[{'source':str(i),'line':1,'score':1,'excerpt':text} for i,text in enumerate(candidates)]
         kwargs={'runner':runner} if runner else {}
         ranked=rerank_results(case['query'],results,command,**kwargs);rank=next(i for i,item in enumerate(ranked,1) if int(item['source'])==relevant)
-        reciprocal.append(1/rank);top1+=rank==1;top3+=rank<=3;ranks.append({'case':number,'rank':rank,'candidates':len(candidates)})
+        reciprocal.append(1/rank);top1+=rank==1;top3+=rank<=3;top5+=rank<=5;ranks.append({'case':number,'rank':rank,'candidates':len(candidates)})
     encoded=json.dumps(cases,sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode()
-    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases),'top_3_accuracy':top3/len(cases),'median_rank':statistics.median(item['rank'] for item in ranks),'worst_rank':max(item['rank'] for item in ranks)}
+    result={'cases':len(cases),'case_set_sha256':hashlib.sha256(encoded).hexdigest(),'mean_reciprocal_rank':sum(reciprocal)/len(reciprocal),'top_1_accuracy':top1/len(cases),'top_3_accuracy':top3/len(cases),'top_5_accuracy':top5/len(cases),'median_rank':statistics.median(item['rank'] for item in ranks),'worst_rank':max(item['rank'] for item in ranks)}
     if include_cases:result['case_ranks']=ranks
     return result
 def compare_metrics(baseline,candidate):
@@ -26,6 +26,9 @@ def compare_metrics(baseline,candidate):
     if 'top_3_accuracy' in baseline or 'top_3_accuracy' in candidate:
         if not all(type(result.get('top_3_accuracy')) in (int,float) for result in (baseline,candidate)):raise ValueError('Both benchmark results require numeric top-3 accuracy when either supplies it')
         deltas['top_3_accuracy_delta']=candidate['top_3_accuracy']-baseline['top_3_accuracy']
+    if 'top_5_accuracy' in baseline or 'top_5_accuracy' in candidate:
+        if not all(type(result.get('top_5_accuracy')) in (int,float) for result in (baseline,candidate)):raise ValueError('Both benchmark results require numeric top-5 accuracy when either supplies it')
+        deltas['top_5_accuracy_delta']=candidate['top_5_accuracy']-baseline['top_5_accuracy']
     if 'median_rank' in baseline or 'median_rank' in candidate:
         if not all(type(result.get('median_rank')) in (int,float) for result in (baseline,candidate)):raise ValueError('Both benchmark results require numeric median rank when either supplies it')
         deltas['median_rank_delta']=candidate['median_rank']-baseline['median_rank']
@@ -55,6 +58,7 @@ def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     if deltas['mean_reciprocal_rank_delta']<minimum_mrr_delta:reasons.append(f'MRR delta below {minimum_mrr_delta:g}')
     if deltas['top_1_accuracy_delta']<0:reasons.append('top-1 accuracy regressed')
     if deltas.get('top_3_accuracy_delta',0)<0:reasons.append('top-3 accuracy regressed')
+    if deltas.get('top_5_accuracy_delta',0)<0:reasons.append('top-5 accuracy regressed')
     if deltas.get('median_rank_delta',0)>0:reasons.append('median relevant-result rank regressed')
     if deltas.get('worst_rank_delta',0)>0:reasons.append('worst relevant-result rank regressed')
     diagnostics={}
