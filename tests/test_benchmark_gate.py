@@ -26,3 +26,7 @@ class GateTests(unittest.TestCase):
  def test_median_rank_regression_blocks_promotion(self):
   base={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'median_rank':2};candidate={**base,'mean_reciprocal_rank':.55,'median_rank':3}
   result=promotion_gate(base,candidate);self.assertFalse(result['promote']);self.assertIn('median relevant-result rank regressed',result['reasons'])
+ def test_rejects_invalid_gate_thresholds(self):
+  result={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4}
+  for kwargs in ({'minimum_cases':0},{'minimum_mrr_delta':-0.1},{'minimum_mrr_delta':float('nan')}):
+   with self.assertRaises(ValueError):promotion_gate(result,result,**kwargs)

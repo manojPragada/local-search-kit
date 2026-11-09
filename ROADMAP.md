@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-11-09: Hardened benchmark comparison and promotion inputs: accuracy/MRR values must be finite and within 0–1, ranks must be positive, and gate thresholds are bounded. Malformed `NaN`, infinity or out-of-range data can no longer accidentally pass promotion. Next: evaluate an optional embedding example only when it can clear the complete promotion gate.
+
 2026-11-08: Added top-five benchmark accuracy, comparison deltas and a promotion-gate regression block so broader near-miss quality cannot degrade behind aggregate MRR gains. Next: evaluate an optional embedding example only when it can clear the complete promotion gate.
 
 2026-11-07: Made a supplied median relevant-result rank regression block benchmark promotion, preventing aggregate MRR gains from hiding worse typical placement. Next: evaluate an optional embedding example only when it can clear the complete promotion gate.
