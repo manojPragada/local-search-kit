@@ -24,6 +24,15 @@ Benchmark output includes worst relevant-result rank; a negative candidate-minus
 
 `benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must have the same canonical case-set SHA-256 fingerprint, default to at least 20 labelled cases, improve MRR by at least 0.02, avoid top-1 and supplied top-3/top-5 regressions, and avoid worsening supplied median or worst relevant-result ranks. Metrics and gate thresholds are validated as finite values in their documented ranges, so malformed `NaN`, infinity or out-of-range comparison data cannot accidentally pass. When per-case diagnostics are supplied, any individual rank regression also blocks promotion and the result reports improved, unchanged and regressed case counts plus the worst regression. The fingerprint identifies benchmark inputs; it is not a secrecy or integrity guarantee. Passing is evidence for this corpus only, never a general semantic-quality claim.
 
+The same gate is available from the CLI. Save a baseline run, then evaluate a candidate against it; `--require-promotion` optionally returns exit code 1 when the measured candidate does not pass (invalid input remains exit 2):
+
+```bash
+python benchmark.py cases.json /path/to/baseline-reranker > baseline.json
+python benchmark.py cases.json /path/to/candidate-reranker --baseline-result baseline.json --require-promotion
+```
+
+Use `--minimum-cases` and `--minimum-mrr-delta` only when your evaluation protocol has a documented reason to override the conservative defaults. With a baseline, output contains both the candidate `evaluation` and the complete `promotion_gate` decision.
+
 Benchmark JSON now includes bounded per-case rank and candidate-count diagnostics alongside aggregate top-1 accuracy and mean reciprocal rank, making regressions inspectable without changing ranking behavior.
 
 Results rank by the fraction of distinct query words matched on a single line, then by path and line for deterministic ties. Matching is case-insensitive and Unicode-aware. Citations are relative file paths and one-based line numbers.

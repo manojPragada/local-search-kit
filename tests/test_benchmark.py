@@ -1,6 +1,9 @@
-import json,unittest
+import io,json,tempfile,unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest.mock import patch
 from types import SimpleNamespace
-from benchmark import evaluate
+from benchmark import evaluate,main
 
 class BenchmarkTests(unittest.TestCase):
     def test_reports_bounded_ranking_metrics(self):
@@ -11,3 +14,13 @@ class BenchmarkTests(unittest.TestCase):
     def test_rejects_invalid_cases(self):
         for cases in [[],[{'query':'q','candidates':['x'],'relevant':2}]]:
             with self.assertRaises(ValueError):evaluate(cases,'model',lambda *a,**k:None)
+
+    def test_cli_compares_saved_baseline_through_promotion_gate(self):
+        root=Path(__file__).parents[1];cases=root/'examples'/'benchmark.json';reranker=root/'examples'/'tfidf_reranker.py'
+        baseline=evaluate(json.loads(cases.read_text()),str(reranker),include_cases=True)
+        with tempfile.TemporaryDirectory() as folder:
+            baseline_path=Path(folder)/'baseline.json';baseline_path.write_text(json.dumps(baseline))
+            output=io.StringIO()
+            argv=['benchmark.py',str(cases),str(reranker),'--baseline-result',str(baseline_path),'--minimum-cases','1','--minimum-mrr-delta','0','--require-promotion']
+            with patch('sys.argv',argv),redirect_stdout(output):code=main()
+        result=json.loads(output.getvalue());self.assertEqual(code,0);self.assertTrue(result['promotion_gate']['promote']);self.assertIn('evaluation',result)

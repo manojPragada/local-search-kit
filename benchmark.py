@@ -73,8 +73,15 @@ def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     return {'promote':not reasons,'reasons':reasons,**deltas,**diagnostics}
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('cases');parser.add_argument('reranker');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('cases');parser.add_argument('reranker');parser.add_argument('--baseline-result',help='Compare with a previously saved benchmark JSON result');parser.add_argument('--minimum-cases',type=int,default=20);parser.add_argument('--minimum-mrr-delta',type=float,default=.02);parser.add_argument('--require-promotion',action='store_true',help='Exit 1 when the supplied baseline does not pass the promotion gate');args=parser.parse_args()
     try:
-        cases=json.loads(Path(args.cases).read_text(encoding='utf-8'));print(json.dumps(evaluate(cases,args.reranker,include_cases=True),indent=2));return 0
+        if args.require_promotion and not args.baseline_result:raise ValueError('--require-promotion requires --baseline-result')
+        cases=json.loads(Path(args.cases).read_text(encoding='utf-8'));evaluation=evaluate(cases,args.reranker,include_cases=True)
+        if not args.baseline_result:
+            print(json.dumps(evaluation,indent=2));return 0
+        baseline=json.loads(Path(args.baseline_result).read_text(encoding='utf-8'))
+        gate=promotion_gate(baseline,evaluation,args.minimum_cases,args.minimum_mrr_delta)
+        print(json.dumps({'evaluation':evaluation,'promotion_gate':gate},indent=2))
+        return int(args.require_promotion and not gate['promote'])
     except (OSError,ValueError,json.JSONDecodeError) as error:print(str(error),file=sys.stderr);return 2
 if __name__=='__main__':sys.exit(main())
