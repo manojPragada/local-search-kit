@@ -12,8 +12,21 @@ class GateTests(unittest.TestCase):
  def test_case_rank_diagnostics_block_hidden_regressions(self):
   old=[{'case':1,'rank':2,'candidates':3},{'case':2,'rank':1,'candidates':3}];new=[{'case':1,'rank':1,'candidates':3},{'case':2,'rank':2,'candidates':3}]
   self.assertEqual(compare_case_ranks({'case_ranks':old},{'case_ranks':new}),{'improved_cases':1,'unchanged_cases':0,'regressed_cases':1,'worst_rank_regression':1})
-  base={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'case_ranks':old};candidate={**base,'mean_reciprocal_rank':.55,'top_1_accuracy':.4,'case_ranks':new}
-  result=promotion_gate(base,candidate);self.assertFalse(result['promote']);self.assertIn('individual case ranks',result['reasons'][-1])
+  base={'cases':2,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'case_ranks':old};candidate={**base,'mean_reciprocal_rank':.55,'top_1_accuracy':.4,'case_ranks':new}
+  result=promotion_gate(base,candidate,minimum_cases=2);self.assertFalse(result['promote']);self.assertIn('individual case ranks',result['reasons'][-1])
+ def test_rejects_incomplete_case_rank_diagnostics(self):
+  base={'cases':2,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'case_ranks':[{'case':1,'rank':1,'candidates':2}]}
+  with self.assertRaisesRegex(ValueError,'declared case count'):promotion_gate(base,{**base})
+ def test_rejects_malformed_case_rank_diagnostics(self):
+  valid={'case_ranks':[{'case':1,'rank':1,'candidates':2}]}
+  invalid=(
+   {'case_ranks':[{'case':2,'rank':1,'candidates':2}]},
+   {'case_ranks':[{'case':1,'rank':0,'candidates':2}]},
+   {'case_ranks':[{'case':1,'rank':3,'candidates':2}]},
+   {'case_ranks':[{'case':1,'rank':1,'candidates':0}]},
+  )
+  for result in invalid:
+   with self.subTest(result=result),self.assertRaises(ValueError):compare_case_ranks(valid,result)
  def test_worst_rank_regression_blocks_promotion_without_case_details(self):
   base={'cases':20,'case_set_sha256':'a'*64,'mean_reciprocal_rank':.5,'top_1_accuracy':.4,'worst_rank':4};candidate={**base,'mean_reciprocal_rank':.55,'worst_rank':5}
   result=promotion_gate(base,candidate);self.assertFalse(result['promote']);self.assertIn('worst relevant-result rank regressed',result['reasons'])

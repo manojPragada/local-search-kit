@@ -17,6 +17,8 @@
 
 ## Continuity
 
+2026-11-11: Hardened saved per-case benchmark diagnostics: entries must cover every declared case in sequence, use bounded positive candidate counts and keep each rank within its case. Malformed diagnostics can no longer qualify an optional reranker. Next: evaluate an optional embedding example only when it can clear the complete promotion gate.
+
 2026-11-10: Exposed the complete benchmark promotion gate through the CLI, including saved-baseline comparison, configurable validated thresholds and an opt-in nonzero exit for candidates that do not pass. Next: evaluate an optional embedding example only when it can clear the complete promotion gate.
 
 2026-11-09: Hardened benchmark comparison and promotion inputs: accuracy/MRR values must be finite and within 0–1, ranks must be positive, and gate thresholds are bounded. Malformed `NaN`, infinity or out-of-range data can no longer accidentally pass promotion. Next: evaluate an optional embedding example only when it can clear the complete promotion gate.

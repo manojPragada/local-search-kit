@@ -43,8 +43,11 @@ def compare_case_ranks(baseline,candidate):
     old,new=baseline.get('case_ranks'),candidate.get('case_ranks')
     if not isinstance(old,list) or not isinstance(new,list) or len(old)!=len(new) or not old:raise ValueError('Both benchmark results require aligned non-empty case ranks')
     deltas=[]
-    for before,after in zip(old,new):
-        if not all(isinstance(item,dict) for item in (before,after)) or before.get('case')!=after.get('case') or before.get('candidates')!=after.get('candidates') or type(before.get('rank')) is not int or type(after.get('rank')) is not int:raise ValueError('Case-rank diagnostics must align by case and candidate count')
+    for number,(before,after) in enumerate(zip(old,new),1):
+        if not all(isinstance(item,dict) for item in (before,after)) or before.get('case')!=number or after.get('case')!=number or before.get('candidates')!=after.get('candidates'):raise ValueError('Case-rank diagnostics must be sequential and align by case and candidate count')
+        candidate_count=before.get('candidates')
+        if type(candidate_count) is not int or not 1<=candidate_count<=100:raise ValueError('Case-rank diagnostics require 1–100 candidates per case')
+        if any(type(item.get('rank')) is not int or not 1<=item['rank']<=candidate_count for item in (before,after)):raise ValueError('Case-rank diagnostics require ranks within the candidate count')
         deltas.append(after['rank']-before['rank'])
     return {'improved_cases':sum(delta<0 for delta in deltas),'unchanged_cases':sum(delta==0 for delta in deltas),'regressed_cases':sum(delta>0 for delta in deltas),'worst_rank_regression':max(0,max(deltas))}
 def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
@@ -68,6 +71,7 @@ def promotion_gate(baseline,candidate,minimum_cases=20,minimum_mrr_delta=.02):
     if deltas.get('worst_rank_delta',0)>0:reasons.append('worst relevant-result rank regressed')
     diagnostics={}
     if 'case_ranks' in baseline or 'case_ranks' in candidate:
+        if any(not isinstance(result.get('case_ranks'),list) or len(result['case_ranks'])!=result['cases'] for result in (baseline,candidate)):raise ValueError('Case-rank diagnostics must match the declared case count')
         diagnostics=compare_case_ranks(baseline,candidate)
         if diagnostics['regressed_cases']:reasons.append(f"{diagnostics['regressed_cases']} individual case ranks regressed")
     return {'promote':not reasons,'reasons':reasons,**deltas,**diagnostics}
