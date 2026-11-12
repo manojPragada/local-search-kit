@@ -18,11 +18,11 @@ Use `python3` if your system does not provide `python`. No package installation 
 
 ## Usage and behavior
 
-Benchmark output includes worst relevant-result rank; a negative candidate-minus-baseline worst-rank delta means the worst measured case improved. This is corpus-specific and not a general quality claim.
+Benchmark output includes mean, median and worst relevant-result rank. Negative candidate-minus-baseline rank deltas mean measured placement improved. These metrics are corpus-specific and not a general quality claim.
 
 `benchmark.compare_metrics` reports candidate-minus-baseline MRR and top-1 deltas, plus top-3, top-5 and median-rank deltas when both results include those metrics. A negative median-rank delta means better typical placement; none of these values claims statistical significance or general quality.
 
-`benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must have the same canonical case-set SHA-256 fingerprint, default to at least 20 labelled cases, improve MRR by at least 0.02, avoid top-1 and supplied top-3/top-5 regressions, and avoid worsening supplied median or worst relevant-result ranks. Metrics and gate thresholds are validated as finite values in their documented ranges, so malformed `NaN`, infinity or out-of-range comparison data cannot accidentally pass. When per-case diagnostics are supplied, they must contain one sequential entry per declared case, use 1–100 candidates and keep each rank within that count. Any individual rank regression blocks promotion, and the result reports improved, unchanged and regressed case counts plus the worst regression. The fingerprint identifies benchmark inputs; it is not a secrecy or integrity guarantee. Passing is evidence for this corpus only, never a general semantic-quality claim.
+`benchmark.promotion_gate` adds a deliberately conservative documentation gate: candidate and baseline must have the same canonical case-set SHA-256 fingerprint, default to at least 20 labelled cases, improve MRR by at least 0.02, avoid top-1 and supplied top-3/top-5 regressions, and avoid worsening supplied mean, median or worst relevant-result ranks. Metrics and gate thresholds are validated as finite values in their documented ranges, so malformed `NaN`, infinity or out-of-range comparison data cannot accidentally pass. When per-case diagnostics are supplied, they must contain one sequential entry per declared case, use 1–100 candidates and keep each rank within that count. Any individual rank regression blocks promotion, and the result reports improved, unchanged and regressed case counts plus the worst regression. The fingerprint identifies benchmark inputs; it is not a secrecy or integrity guarantee. Passing is evidence for this corpus only, never a general semantic-quality claim.
 
 The same gate is available from the CLI. Save a baseline run, then evaluate a candidate against it; `--require-promotion` optionally returns exit code 1 when the measured candidate does not pass (invalid input remains exit 2):
 
@@ -51,7 +51,7 @@ Evaluate a candidate local model against a small, human-labelled JSON set before
 python benchmark.py examples/benchmark.json /absolute/path/to/reranker
 ```
 
-Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1, top-3 and top-5 accuracy, mean reciprocal rank and median relevant-result rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
+Each case supplies a query, 1–100 candidate strings and the zero-based index of the relevant candidate. The harness reports top-1, top-3 and top-5 accuracy, mean reciprocal rank, and mean/median/worst relevant-result rank. The bundled two-case set is only a protocol smoke test, not evidence of model quality; replace it with representative private cases and do not commit sensitive text.
 
 `examples/tfidf_reranker.py` is a dependency-free local statistical baseline implementing the protocol. It scores only query-word overlap using TF-IDF; it is not an embedding model, does not understand meaning and cannot retrieve candidates missed by lexical search. Run it reproducibly with:
 
